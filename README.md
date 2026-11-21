@@ -1,5 +1,11 @@
 # imgmark
 
+![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Tests](https://img.shields.io/badge/tests-10%20passing-success)
+![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
+
 批量图片水印工具 —— 一条命令给整个目录的照片加上平铺 / 角标 / 居中水印。
 
 - **三种布局**：`tile` 45° 平铺（样片防盗图）、`corner` 四角角标（版权署名）、`center` 居中（预览图）
@@ -80,6 +86,18 @@ batch(Path("photos"), Path("out"), WatermarkOptions(text="© 2026", mode="corner
 ```bash
 python -m unittest discover -s tests
 # Ran 10 tests ... OK
+```
+
+
+## 📁 项目结构
+
+```
+imgmark/
+├── LICENSE
+├── imgmark/
+├── pyproject.toml
+├── tests/
+└── README.md
 ```
 
 ## License
