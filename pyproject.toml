@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imgmark"
+version = "0.1.0"
+description = "批量图片水印 CLI：平铺/角标/居中、透明度、旋转、字体回退链"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+dependencies = ["Pillow>=9.0"]
+keywords = ["watermark", "image", "批量水印", "样片"]
+
+[project.scripts]
+imgmark = "imgmark.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["imgmark*"]
