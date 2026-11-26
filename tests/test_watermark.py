@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageChops
 
 from imgmark.watermark import (
     SUPPORTED_EXTS,
@@ -58,22 +58,22 @@ class TestApply(unittest.TestCase):
     def test_tile_changes_many_pixels(self):
         img = solid(640, 480, color=(20, 20, 20))
         out = apply_watermark(img, WatermarkOptions(text="WATER", mode="tile", opacity=0.9))
-        diff = sum(1 for a, b in zip(img.getdata(), out.getdata()) if a != b)
-        self.assertGreater(diff, 500)  # 平铺应显著改变画面
+        changed_channels = sum(value != 0 for value in ImageChops.difference(img, out).tobytes())
+        self.assertGreater(changed_channels, 500)  # 平铺应显著改变画面
 
     def test_corner_only_changes_corner(self):
         img = solid(400, 300, color=(10, 10, 10))
         out = apply_watermark(img, WatermarkOptions(text="MARK", mode="corner",
                                                     corner="br", margin=10, opacity=1.0))
         self.assertEqual(img.getpixel((50, 50)), out.getpixel((50, 50)))  # 左上不动
-        region = out.crop((out.width - 120, out.height - 60, out.width, out.height))
-        colors = set(region.getdata())
-        self.assertGreater(len(colors), 1)  # 右下角有变化
+        box = (out.width - 120, out.height - 60, out.width, out.height)
+        self.assertIsNotNone(ImageChops.difference(img.crop(box), out.crop(box)).getbbox())
 
     def test_center_changes_middle(self):
         img = solid(400, 300, color=(0, 0, 0))
         out = apply_watermark(img, WatermarkOptions(text="CENTER", mode="center", opacity=1.0))
-        self.assertNotEqual(img.getpixel((200, 150)), out.getpixel((200, 150)))
+        box = (150, 100, 250, 200)
+        self.assertIsNotNone(ImageChops.difference(img.crop(box), out.crop(box)).getbbox())
 
     def test_original_not_mutated(self):
         img = solid()
