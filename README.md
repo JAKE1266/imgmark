@@ -1,9 +1,9 @@
 # imgmark
 
-![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Tests](https://img.shields.io/badge/tests-10%20passing-success)
-![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)
+![Tests](https://img.shields.io/badge/tests-14%20passing-success)
+![Dependencies](https://img.shields.io/badge/dependencies-Pillow%20%3E%3D%2010.1-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 
 批量图片水印工具 —— 一条命令给整个目录的照片加上平铺 / 角标 / 居中水印。
@@ -11,17 +11,16 @@
 - **三种布局**：`tile` 45° 平铺（样片防盗图）、`corner` 四角角标（版权署名）、`center` 居中（预览图）
 - **排版细节**：透明度、字号自适应（按图宽 1/14）、旋转角、间距、颜色、边距都可调
 - **格式友好**：jpg / png / webp / bmp 输入，jpg 输出自动转 RGB 避免 alpha 报错
-- **批量安全**：输出目录自动跳过不再二次处理；损坏文件跳过不中断；文字图层纯函数不碰原图
+- **批量安全**：输出目录自动跳过不再二次处理；损坏文件跳过不中断；文字图层纯函数不碰原图；输出目录不能与输入目录相同
 - **中文字体**：内置微软雅黑 / 黑体 / Arial / DejaVu / PingFang 回退链，找不到时兜底 Pillow 内置字体
 
-依赖 Pillow，Python ≥ 3.8。
+依赖 Pillow >= 10.1.0，Python >= 3.9。
 
 ## 安装
 
 ```bash
-pip install Pillow
-pip install .        # 获得 imgmark 命令
-python -m imgmark --help    # 或免安装运行
+python -m pip install .        # 自动安装 Pillow,获得 imgmark 命令
+python -m imgmark --help       # 安装后也可用模块方式运行
 ```
 
 ## 真实运行示例
@@ -84,9 +83,17 @@ batch(Path("photos"), Path("out"), WatermarkOptions(text="© 2026", mode="corner
 ## 运行测试
 
 ```bash
-python -m unittest discover -s tests
-# Ran 10 tests ... OK
+python -m pip install .
+python -m unittest discover -s tests -v
+
+# 发布包验证
+python -m pip install build twine
+python -m build
+python -m twine check dist/*
+python tests/smoke_installed.py
 ```
+
+冒烟脚本会先下载 Pillow wheel,再在干净虚拟环境中离线安装并运行完整水印流程。
 
 
 ## 📁 项目结构

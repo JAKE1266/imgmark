@@ -33,6 +33,12 @@ class TestOptions(unittest.TestCase):
             WatermarkOptions(text="x", opacity=0)
         with self.assertRaises(ValueError):
             WatermarkOptions(text="x", corner="middle")
+        with self.assertRaises(ValueError):
+            WatermarkOptions(text="x", size=-1)
+        with self.assertRaises(ValueError):
+            WatermarkOptions(text="x", gap=-1)
+        with self.assertRaises(ValueError):
+            WatermarkOptions(text="x", margin=-1)
 
     def test_parse_color(self):
         self.assertEqual(parse_color("#FFFFFF"), (255, 255, 255))
@@ -97,13 +103,19 @@ class TestBatch(unittest.TestCase):
         names = [p.name for p in written]
         self.assertEqual(sorted(names), ["a.jpg", "b.png"])  # broken.jpg / notes.txt 跳过
         self.assertTrue((out / "a.jpg").exists())
-        img = Image.open(out / "a.jpg")
-        self.assertEqual(img.mode, "RGB")  # jpg 输出自动转 RGB
+        with Image.open(out / "a.jpg") as img:
+            self.assertEqual(img.mode, "RGB")  # jpg 输出自动转 RGB
 
     def test_batch_pattern_filter(self):
         out = self.src / "out2"
         written = batch(self.src, out, WatermarkOptions(text="D"), pattern="*.png")
         self.assertEqual([p.name for p in written], ["b.png"])
+
+    def test_batch_rejects_same_output_directory(self):
+        original = (self.src / "a.jpg").read_bytes()
+        with self.assertRaises(ValueError):
+            batch(self.src, self.src, WatermarkOptions(text="D"))
+        self.assertEqual((self.src / "a.jpg").read_bytes(), original)
 
     def test_batch_missing_dir(self):
         with self.assertRaises(NotADirectoryError):

@@ -16,7 +16,15 @@ from . import __version__
 from .watermark import SUPPORTED_EXTS, WatermarkOptions, batch
 
 
+def _configure_standard_streams() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
+
+
 def main(argv: list[str] | None = None) -> int:
+    _configure_standard_streams()
     ap = argparse.ArgumentParser(
         prog="imgmark",
         description="批量图片水印：平铺 / 角标 / 居中，支持透明度、旋转与多格式",
@@ -49,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
         src = Path(args.dir)
         out = Path(args.out) if args.out else src / "watermarked"
         written = batch(src, out, opt, pattern=args.pattern)
-    except (ValueError, NotADirectoryError) as e:
+    except (ValueError, OSError) as e:
         print(f"错误：{e}", file=sys.stderr)
         return 2
 

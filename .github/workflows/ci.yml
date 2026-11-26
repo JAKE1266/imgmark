@@ -12,15 +12,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-24.04, windows-latest, macos-latest]
         python: ["3.9", "3.11", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+      - name: 安装构建工具
+        run: python -m pip install build
+      - name: 构建 wheel
+        run: python -m build --wheel --outdir dist
+      - name: 安装 wheel 与依赖
+        run: python -m pip install dist/imgmark-0.1.0-py3-none-any.whl
       - name: 运行单元测试
-        env:
-          PYTHONIOENCODING: utf-8
-          PYTHONUTF8: "1"
         run: python -m unittest discover -s tests -v
+      - name: 干净环境安装与 CLI 冒烟
+        run: python tests/smoke_installed.py
+
+  build:
+    name: 构建发布产物
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: 安装构建工具
+        run: python -m pip install build twine
+      - name: 构建 wheel 和 sdist
+        run: python -m build
+      - name: 检查发布产物
+        run: python -m twine check dist/*

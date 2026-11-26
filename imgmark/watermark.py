@@ -40,6 +40,12 @@ class WatermarkOptions:
             raise ValueError(f"未知角标方位 {self.corner!r}")
         if not 0 < self.opacity <= 1:
             raise ValueError("opacity 需在 (0, 1] 区间")
+        if self.size < 0:
+            raise ValueError("size 不能为负数")
+        if self.gap < 0:
+            raise ValueError("gap 不能为负数")
+        if self.margin < 0:
+            raise ValueError("margin 不能为负数")
 
 
 def load_font(size: int) -> ImageFont.FreeTypeFont:
@@ -133,8 +139,11 @@ def batch(src_dir: Path, out_dir: Path, opt: WatermarkOptions,
     src_dir, out_dir = Path(src_dir), Path(out_dir)
     if not src_dir.is_dir():
         raise NotADirectoryError(str(src_dir))
-    out_dir.mkdir(parents=True, exist_ok=True)
+    src_dir_resolved = src_dir.resolve()
     out_dir_resolved = out_dir.resolve()
+    if out_dir_resolved == src_dir_resolved:
+        raise ValueError("输出目录不能与输入目录相同")
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     if pattern.strip():
         import fnmatch
